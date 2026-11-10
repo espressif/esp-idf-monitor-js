@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "npm run clean && tsc && rollup --config",
-    "clean": "rimraf lib bundle.js esp-idf-monitor-js-*.tgz",
+    "clean": "rimraf lib bundle.js espressif-esp-idf-monitor-js-*.tgz",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"",
     "lint": "eslint . --ext .ts",
     "prepare": "npm run build",

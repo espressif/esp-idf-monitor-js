@@ -34,5 +34,5 @@ jobs:
       - name: Upload npm package file
         uses: actions/upload-artifact@v4
         with:
-          name: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
-          path: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
+          name: espressif-esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
+          path: espressif-esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
