@@ -15,6 +15,7 @@
     "build": "npm run clean && tsc && rollup --config",
     "clean": "rimraf lib bundle.js espressif-esp-idf-monitor-js-*.tgz",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"",
+    "genDocs": "rimraf docs && typedoc",
     "lint": "eslint . --ext .ts",
     "prepare": "npm run build",
     "pretest": "tsc --pretty false",
@@ -53,6 +54,7 @@
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
     "rollup": "^3.3.0",
+    "typedoc": "^0.25.13",
     "typescript": "^5.3.3"
   }
 }
