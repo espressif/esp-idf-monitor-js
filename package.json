@@ -1,0 +1,58 @@
+{
+  "name": "@espressif/esp-idf-monitor-js",
+  "version": "0.1.0",
+  "description": "Browser serial monitor for ESP-IDF, using Web Serial or a WebUSB serial port.",
+  "type": "module",
+  "module": "lib/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "Apache-2.0",
+  "files": [
+    "lib",
+    "bundle.js"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc && rollup --config",
+    "clean": "rimraf lib bundle.js esp-idf-monitor-js-*.tgz",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"",
+    "lint": "eslint . --ext .ts",
+    "prepare": "npm run build",
+    "pretest": "tsc --pretty false",
+    "test": "node --test test/*.test.js",
+    "prepublishOnly": "npm run test && npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/espressif/esp-idf-monitor-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/espressif/esp-idf-monitor-js/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "esp-idf",
+    "espressif",
+    "web-serial",
+    "webusb",
+    "monitor"
+  ],
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.1.0",
+    "@types/w3c-web-serial": "^1.0.3",
+    "@types/w3c-web-usb": "^1.0.10",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jsdoc": "^46.4.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^3.3.0",
+    "typescript": "^5.3.3"
+  }
+}

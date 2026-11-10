@@ -1,0 +1,5 @@
+node_modules
+lib
+bundle.js
+docs
+esp-idf-monitor-js-*.tgz

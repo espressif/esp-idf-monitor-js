@@ -1,0 +1,57 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+      - name: Install dependencies and build
+        run: npm ci && npm run build
+      - name: Run lint
+        run: npm run lint
+      - name: Run tests
+        run: npm run test
+      - name: Package module
+        run: npm pack
+      - name: Verify tag version is the same as package.json version
+        id: version
+        run: |
+          [ ${GITHUB_REF:11} = $(node -p "require('./package.json').version") ]
+          echo "version=${GITHUB_REF:11}" >> "$GITHUB_OUTPUT"
+      - name: Upload package file
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
+          path: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "./esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz"
+          name: esp-idf-monitor-js ${{ github.ref }}
+          draft: true
+          body: |
+            ### Release Highlights
+
+            ### Features & Enhancements
+
+            <!-- Insert the features and enhancements below, with links to the PR or commit. -->
+
+            ### Bug Fixes
+
+            <!-- Insert the bug fixes below, with links. -->
+      - name: Publish package on NPM
+        run: |
+          npm install -g npm@11
+          npm publish

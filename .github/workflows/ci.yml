@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+      - name: Install dependencies and build
+        run: npm ci && npm run build
+      - name: Run lint
+        run: npm run lint
+      - name: Run tests
+        run: npm run test
+      - name: Package module
+        run: npm pack
+      - name: Determine version
+        id: version
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "$PACKAGE_VERSION"
+          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Upload npm package file
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz
+          path: esp-idf-monitor-js-${{ steps.version.outputs.version }}.tgz

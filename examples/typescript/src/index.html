@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ESP-IDF Monitor</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.19.0/css/xterm.css" />
+    <link rel="icon" href="../assets/favicon.ico" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.19.0/lib/xterm.min.js"></script>
+    <style>
+      body { padding-bottom: 40px; }
+      #terminal { height: 420px; background: #111; padding: 8px; margin-top: 12px; overflow: hidden; }
+      #events { height: 220px; overflow: auto; background: #f7f7f7; border: 1px solid #ddd; padding: 8px; }
+      .setting { margin-bottom: 8px; }
+      label { margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1 align="center">
+      <img src="../assets/esp-logo.png" width="42" height="42" alt="" style="vertical-align: middle" />
+      ESP-IDF Monitor
+    </h1>
+    <h4 align="center">Try esp-idf-monitor-js in the browser</h4>
+    <div id="safariErr" style="display: none">
+      <p align="center" style="color: red">This example is not supported on Safari. Web Serial is not available there.</p>
+    </div>
+    <div class="container" id="main">
+      <p id="webUsbNote" class="text-muted"></p>
+      <div class="row">
+        <div class="col-md-5">
+          <h3>Port</h3>
+          <div class="checkbox">
+            <label><input type="checkbox" id="useWebUsb" /> Use WebUSB instead of Web Serial</label>
+          </div>
+          <button class="btn btn-info" id="connectButton" type="button">Choose port</button>
+          <p id="portStatus">No port granted.</p>
+
+          <h3>ELF files</h3>
+          <div class="setting">
+            <label for="appElf">App ELF</label>
+            <input type="file" id="appElf" accept=".elf" />
+          </div>
+          <div class="setting">
+            <label for="romElf">ROM ELF</label>
+            <input type="file" id="romElf" accept=".elf" />
+          </div>
+
+          <h3>Settings</h3>
+          <div class="setting">
+            <label for="baudRate">Baud</label>
+            <select id="baudRate">
+              <option value="74880">74880</option>
+              <option value="115200" selected>115200</option>
+              <option value="230400">230400</option>
+              <option value="460800">460800</option>
+              <option value="921600">921600</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="target">Target</label>
+            <select id="target">
+              <option value="esp32" selected>esp32</option>
+              <option value="esp32s2">esp32s2</option>
+              <option value="esp32s3">esp32s3</option>
+              <option value="esp32c2">esp32c2</option>
+              <option value="esp32c3">esp32c3</option>
+              <option value="esp32c6">esp32c6</option>
+              <option value="esp32h2">esp32h2</option>
+              <option value="esp32p4">esp32p4</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="printFilter">Print filter</label>
+            <input id="printFilter" type="text" placeholder="wifi:I *:E" />
+          </div>
+          <div class="setting">
+            <label for="eol">EOL</label>
+            <select id="eol">
+              <option value="CR" selected>CR</option>
+              <option value="LF">LF</option>
+              <option value="CRLF">CRLF</option>
+            </select>
+          </div>
+          <div class="checkbox"><label><input id="noReset" type="checkbox" /> No reset on start</label></div>
+          <div class="checkbox"><label><input id="timestamps" type="checkbox" /> Timestamps</label></div>
+          <div class="checkbox"><label><input id="decodeAddresses" type="checkbox" checked /> Decode addresses</label></div>
+          <div class="checkbox"><label><input id="autoColor" type="checkbox" checked /> Auto color</label></div>
+          <div class="setting">
+            <label for="decodePanic">Panic</label>
+            <select id="decodePanic">
+              <option value="disable" selected>disable</option>
+              <option value="backtrace">backtrace</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="decodeCoredumps">Core dump</label>
+            <select id="decodeCoredumps">
+              <option value="info" selected>info</option>
+              <option value="disable">disable</option>
+            </select>
+          </div>
+          <details>
+            <summary>More settings</summary>
+            <div class="setting">
+              <label for="timestampFormat">Timestamp format</label>
+              <input id="timestampFormat" type="text" value="%Y-%m-%d %H:%M:%S" />
+            </div>
+            <div class="setting">
+              <label for="reconnectDelay">Reconnect delay (seconds)</label>
+              <input id="reconnectDelay" type="number" min="0" step="0.1" value="0.5" />
+            </div>
+            <div class="setting">
+              <label for="openPortAttempts">Open attempts (0 = forever)</label>
+              <input id="openPortAttempts" type="number" min="0" step="1" value="1" />
+            </div>
+            <div class="checkbox"><label><input id="encrypted" type="checkbox" /> Encrypted flash requests</label></div>
+            <div class="checkbox"><label><input id="skipMenuKey" type="checkbox" /> Skip menu key</label></div>
+            <div class="setting">
+              <label for="customResetSequence">Custom bootloader reset</label>
+              <input id="customResetSequence" type="text" placeholder="D0|R1|W0.1|U0,1" />
+            </div>
+            <div class="setting">
+              <label for="customHardResetSequence">Custom hard reset</label>
+              <input id="customHardResetSequence" type="text" placeholder="R1|W0.005|R0" />
+            </div>
+          </details>
+          <p class="text-muted">
+            Chrome uses Ctrl+T for a new tab, so that menu key often never reaches the terminal. Use the buttons to
+            reset, enter the bootloader, and toggle output, timestamps, and log capture. Typed text and Ctrl+C still go
+            to the chip.
+          </p>
+          <button class="btn btn-success" id="startButton" type="button">Start</button>
+          <button class="btn btn-warning" id="stopButton" type="button">Stop</button>
+        </div>
+        <div class="col-md-7">
+          <h3>Session</h3>
+          <button class="btn btn-default" id="resetButton" type="button">Reset</button>
+          <button class="btn btn-default" id="bootloaderButton" type="button">Bootloader</button>
+          <button class="btn btn-default" id="outputButton" type="button">Toggle output</button>
+          <button class="btn btn-default" id="timestampButton" type="button">Toggle timestamps</button>
+          <button class="btn btn-default" id="logButton" type="button">Toggle log</button>
+          <div class="setting" style="margin-top: 8px">
+            <input id="sendText" type="text" placeholder="Text to send" />
+            <button class="btn btn-info" id="sendButton" type="button">Send</button>
+          </div>
+          <div id="terminal"></div>
+          <h3>Events</h3>
+          <div id="events"></div>
+        </div>
+      </div>
+    </div>
+    <script src="index.ts" type="module"></script>
+    <script>
+      var isSafari =
+        /constructor/i.test(window.HTMLElement) ||
+        (function (pushNotification) {
+          return pushNotification.toString() === "[object SafariRemoteNotification]";
+        })(!window.safari || (typeof safari !== "undefined" && window.safari.pushNotification));
+      if (isSafari) {
+        document.getElementById("safariErr").style.display = "block";
+        document.getElementById("main").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
