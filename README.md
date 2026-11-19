@@ -67,7 +67,7 @@ On `flash`, close the monitor and flash with [esptool-js](https://github.com/esp
 
 [examples/typescript](examples/typescript) is a page that grants a Web Serial or WebUSB port, loads an ELF, and starts a monitor. Build this package, then run `npm install` and `npm run dev` in that directory.
 
-GitHub Actions publishes the built example to GitHub Pages from `main`. Enable Pages in the repository settings. The site is `https://espressif.github.io/esp-idf-monitor-js/`. The API reference, generated from the source comments, is `https://espressif.github.io/esp-idf-monitor-js/docs/`.
+GitHub Actions publishes the built example to the `gh-pages` branch from `main`. In the repository settings, set Pages to deploy from the `gh-pages` branch and the `/ (root)` folder. The site is `https://espressif.github.io/esp-idf-monitor-js/`. The API reference, generated from the source comments, is `https://espressif.github.io/esp-idf-monitor-js/docs/`. A pull request from this repository publishes the same example to `https://espressif.github.io/esp-idf-monitor-js/pr-preview/pr-<number>/` and comments that address on the pull request. The preview is removed when the pull request closes.
 
 ## Publish
 
