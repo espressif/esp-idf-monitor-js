@@ -137,7 +137,7 @@ export async function waitFor(predicate, label = "condition") {
  * Build a tiny executable ELF32 with one function symbol.
  * Extra sections are appended after the symbol table. Omit `symbol` for a ROM-like image.
  * @param {object} [options] Address, symbol name, and optional non-allocated sections.
- * @param {Array<{ name: string, data: Uint8Array }>} [options.sections] Debug sections such as `.debug_line`.
+ * @param {Array<{ name: string, data: Uint8Array, addr?: number }>} [options.sections] Debug or data sections such as `.debug_line`. `addr` is the section virtual address.
  * @returns {Uint8Array} ELF bytes.
  */
 export function buildElf(options = {}) {
@@ -168,7 +168,7 @@ export function buildElf(options = {}) {
   const extras = [];
   let cursor = symOff + sym.length;
   for (const section of extra) {
-    extras.push({ name: section.name, off: cursor, data: section.data });
+    extras.push({ name: section.name, off: cursor, data: section.data, addr: section.addr ?? 0 });
     cursor += section.data.length;
   }
   const shoff = cursor;
@@ -203,7 +203,7 @@ export function buildElf(options = {}) {
       name: names[section.name],
       type: 1,
       flags: 0,
-      addr: 0,
+      addr: section.addr,
       off: section.off,
       size: section.data.length,
       link: 0,

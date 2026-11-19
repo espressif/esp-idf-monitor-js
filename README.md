@@ -59,7 +59,9 @@ Ctrl+] exits. Ctrl+T opens the menu (reset, bootloader, flash, output, timestamp
 
 It does not launch `gdb`, `addr2line`, `idf.py`, or `espefuse`. 
 
-Address decoration uses the ELF symbol table and the DWARF line table in the application ELF, so a program counter prints as a function, source file, and line. A ROM address is labeled `ROM`. Inlined calls, C++ demangling, binary logs, and a human-readable core dump are left to the page or a later decoder that implements `AddressDecoder`.
+Address decoration uses the ELF symbol table and the DWARF line table in the application ELF, so a program counter prints as a function, source file, and line. A ROM address is labeled `ROM`. Inlined calls, C++ demangling, and a human-readable core dump are left to the page or a later decoder that implements `AddressDecoder`.
+
+Binary logs (`CONFIG_LOG_MODE_BINARY` and `CONFIG_BOOTLOADER_LOG_MODE_BINARY`) are decoded when an ELF is loaded. Format strings are read from that ELF, including its `.noload` section. A bootloader frame uses the ELF whose name ends with `bootloader.elf`. An application frame uses the first ELF.
 
 On `flash`, close the monitor and flash with [esptool-js](https://github.com/espressif/esptool-js) on the same port. Opening the port twice at once will fail.
 
