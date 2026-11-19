@@ -1,8 +1,9 @@
 import { MonitorEmitter } from "./events.js";
 import { SymbolAddressDecoder, formatAddress } from "./elf/address-decoder.js";
-import { loadElf } from "./elf/image.js";
+import { ElfData, asBytes, indexElf, loadElf } from "./elf/image.js";
 import { ConsoleParser } from "./input/console-parser.js";
 import { describeKey, resolveKeys } from "./input/keys.js";
+import { BinaryLogDecoder } from "./output/binlog.js";
 import { Colorizer, Timestamper } from "./output/color.js";
 import { LineMatcher } from "./output/line-matcher.js";
 import { LineBuffer } from "./output/pipeline.js";
@@ -75,6 +76,7 @@ export class IDFMonitor {
   private logCapture: string[] | null = null;
   private digests: string[] = [];
   private decoder: SymbolAddressDecoder | null = null;
+  private binlog: BinaryLogDecoder | null = null;
   private progName: string | undefined;
   private keySubscription: { dispose(): void } | null = null;
   private reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
@@ -381,8 +383,11 @@ export class IDFMonitor {
    */
   private async loadImages(): Promise<void> {
     const loaded: LoadedElf[] = [];
+    const indexed: ElfData[] = [];
     for (const file of this.elfFiles) {
-      loaded.push(await loadElf(file.name, file.data, false));
+      const bytes = asBytes(file.data);
+      loaded.push(await loadElf(file.name, bytes, false));
+      indexed.push(indexElf(file.name, bytes));
     }
     if (this.romElf) {
       loaded.push(await loadElf("rom.elf", this.romElf, true));
@@ -390,6 +395,7 @@ export class IDFMonitor {
     this.digests = loaded.map((elf) => elf.sha256);
     this.decoder = new SymbolAddressDecoder(loaded);
     this.progName = loaded.find((elf) => !elf.rom)?.name;
+    this.binlog = indexed.length > 0 ? new BinaryLogDecoder(indexed) : null;
   }
 
   /**
@@ -421,13 +427,17 @@ export class IDFMonitor {
         }
         reader = this.port.readable.getReader();
         this.reader = reader;
+        this.binlog?.reset();
         while (!this.stopRequested && !this.paused) {
           const { value, done } = await reader.read();
           if (done) {
             throw new Error("device disconnected");
           }
           if (value && value.byteLength > 0) {
-            this.lines.push(value);
+            const decoded = this.binlog ? this.binlog.push(value) : value;
+            if (decoded.byteLength > 0) {
+              this.lines.push(decoded);
+            }
           }
         }
       } catch (error) {
